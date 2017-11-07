@@ -8,7 +8,6 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <artifactId>jflex-testsuite-maven-plugin</artifactId>
-  <version>1.0-beta</version>
   <packaging>maven-plugin</packaging>
   <name>JFlex Test Suite Maven Plugin</name>
   <licenses>

@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FilenameFilter;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -22,24 +21,16 @@ import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 import jflextest.TestStatus.Status;
 
-public class Main {
+public class Tester {
 
-  public static boolean verbose;
+  public boolean verbose;
   public static String jflexTestVersion;
 
-  public static final String version = "1.0alpha";
-
-  private static final int THREADS = 10;
-
   // TODO Change number of threads
+  private static final int THREADS = 1 + Runtime.getRuntime().availableProcessors();
+
   private static ListeningExecutorService executorService =
       MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(THREADS));
-
-  public static void showUsage(String error) {
-    System.out.println("Usage: [-v] [-testpath path] <test1> <test2> <test3> ...");
-    System.out.println();
-    System.out.println(error);
-  }
 
   /**
    * Scan a directory for files with specific extension
@@ -91,8 +82,9 @@ public class Main {
    * @param tests a list of File
    * @return true if all tests succeeded, false otherwise
    */
-  public static boolean runTests(List<File> tests) {
+  public boolean runTests(List<File> tests) {
     System.out.println(String.format("Running tests on %d threads", THREADS));
+    System.out.println();
     ListenableFuture<List<TestStatus>> allResults =
         Futures.allAsList(Lists.transform(tests, runTestAsyncFunction));
     Futures.addCallback(allResults, displayResultCallback, directExecutor());
@@ -118,11 +110,12 @@ public class Main {
   }
 
   /** A function that executes a test asynchronously. */
-  static Function<File, ListenableFuture<TestStatus>> runTestAsyncFunction =
+  Function<File, ListenableFuture<TestStatus>> runTestAsyncFunction =
       new Function<File, ListenableFuture<TestStatus>>() {
         @Nullable
         @Override
         public ListenableFuture<TestStatus> apply(@Nullable final File testFile) {
+          System.out.println("Test async " + testFile);
           return executorService.submit(
               new Callable<TestStatus>() {
                 @Override
@@ -133,20 +126,19 @@ public class Main {
         }
       };
 
-  private static TestStatus runTest(File test) {
+  private TestStatus runTest(File test) {
     // set path to test
+    System.out.println("Testing now " + test);
     File currentDir = new File(test.getParent());
-    // trying to load
-    TestLoader loader = null;
     try {
-      loader = new TestLoader(new FileReader(test));
+      TestLoader loader = new TestLoader(new FileReader(test));
 
       TestCase currentTest = loader.load();
       currentTest.init(currentDir);
 
       // success? -> run
       if (currentTest == null) {
-        throw new TestFailException("not loaded");
+        throw new TestFailException("Failed to load test");
       }
       if (verbose) {
         System.out.println("Loaded successfully"); // - Details:\n"+currentTest);
@@ -200,46 +192,4 @@ public class Main {
           return successfulTests;
         }
       };
-
-  public static void main(String[] argv) {
-    System.setOut(new PrintStream(System.out, true));
-    System.out.println("JFlexTest Version: " + version);
-    System.out.println("Testing version: " + Exec.getJFlexVersion());
-
-    File dir = new File("testcases"); // assume user.dir/testcases
-    List<File> files = new ArrayList<File>();
-
-    for (int i = 0; i < argv.length; i++) {
-
-      if (argv[i].equals("-testpath")) {
-        if (++i >= argv.length) {
-          showUsage("missing path argument");
-          return;
-        }
-        dir = new File(argv[i]);
-        // Quit if dir is not valid
-        if (!dir.isDirectory()) {
-          showUsage(dir + " - test path not found");
-          return;
-        }
-
-        continue;
-      }
-
-      if (argv[i].equals("-v")) {
-        verbose = true;
-        continue;
-      }
-
-      List<File> t = scan(new File(dir, argv[i]), ".test", false);
-      files.addAll(t);
-    }
-
-    // if we still didn't find anything, scan the whole test path
-    if (files.isEmpty()) {
-      files = scan(dir, ".test", true);
-    }
-
-    runTests(files);
-  }
 }

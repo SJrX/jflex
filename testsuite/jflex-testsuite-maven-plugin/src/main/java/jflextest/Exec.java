@@ -61,6 +61,7 @@ public class Exec {
     // Locate the jflex jar in the user's Maven local repository
     classPath.setPath(
         System.getProperty("user.home")
+            // TODO: users can change the location of their repo.
             + "/.m2/repository/de/jflex/jflex/"
             + jflexTestVersion
             + "/jflex-"
@@ -191,7 +192,7 @@ public class Exec {
       System.out.println(
           "class:\n"
               + execClass(
-                  "jflextest.Main",
+                  "jflextest.Tester",
                   ".",
                   new ArrayList<String>(),
                   files,

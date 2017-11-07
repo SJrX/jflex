@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /** Runs test cases in the JFlex test suite */
-@Mojo(name = "run-test-suite", defaultPhase = LifecyclePhase.TEST, threadSafe = true)
+@Mojo(name = "run-test-suite", defaultPhase = LifecyclePhase.TEST)
 public class JFlexTestsuiteMojo extends AbstractMojo {
 
   /** Name of the directory into which the code will be generated. */
@@ -39,7 +39,6 @@ public class JFlexTestsuiteMojo extends AbstractMojo {
     try {
       System.setOut(new PrintStream(System.out, true));
       List<File> files = new ArrayList<File>();
-      getLog().info("JFlexTest Version: " + Main.version);
       getLog().info("Testing version: " + Exec.getJFlexVersion());
       getLog().info("Test directory: " + testDirectory);
       getLog().info("Test case(s): " + (null == testCases ? "All" : testCases));
@@ -50,18 +49,19 @@ public class JFlexTestsuiteMojo extends AbstractMojo {
           if (!dir.isDirectory()) {
             throw new MojoFailureException("Test path not found: " + dir);
           }
-          List<File> t = Main.scan(dir, ".test", false);
+          List<File> t = Tester.scan(dir, ".test", false);
           files.addAll(t);
         }
       }
 
       // if we still didn't find anything, scan the whole test path
-      if (files.isEmpty()) files = Main.scan(new File(testDirectory), ".test", true);
+      if (files.isEmpty()) files = Tester.scan(new File(testDirectory), ".test", true);
 
-      Main.verbose = verbose;
-      Main.jflexTestVersion = jflexTestVersion;
+      Tester tester = new Tester();
+      tester.verbose = verbose;
+      tester.jflexTestVersion = jflexTestVersion;
       getLog().info("verbose: " + verbose);
-      success = Main.runTests(files);
+      success = tester.runTests(files);
 
     } catch (Exception e) {
       throw new MojoExecutionException("Exception", e);
