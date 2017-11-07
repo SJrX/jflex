@@ -8,6 +8,7 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <artifactId>jflex-testsuite-maven-plugin</artifactId>
+  <version>1.0-beta</version>
   <packaging>maven-plugin</packaging>
   <name>JFlex Test Suite Maven Plugin</name>
   <licenses>
@@ -123,6 +124,10 @@
       <version>1.5.0</version>
       <scope>system</scope>
       <systemPath>${toolsjar}</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
     </dependency>
   </dependencies>
 </project>

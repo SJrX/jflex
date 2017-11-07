@@ -7,46 +7,33 @@ import java.util.List;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
-/**
- * Runs test cases in the JFlex test suite
- *
- * @goal run-test-suite
- * @phase test
- */
+/** Runs test cases in the JFlex test suite */
+@Mojo(name = "run-test-suite", defaultPhase = LifecyclePhase.TEST)
 public class JFlexTestsuiteMojo extends AbstractMojo {
 
-  /**
-   * Name of the directory into which the code will be generated.
-   *
-   * @parameter default-value="src/test/cases"
-   */
+  /** Name of the directory into which the code will be generated. */
+  @Parameter(defaultValue = "src/test/cases")
   private String testDirectory = null;
 
-  /**
-   * Whether test suite output should be verbose.
-   *
-   * @parameter default-value="false"
-   */
+  /** Whether test suite output should be verbose. */
+  @Parameter(defaultValue = "false")
   private boolean verbose;
 
   /**
    * (Comma-separated list of) name(s) of test case(s) to run.
    *
    * <p>By default, all test cases in src/test/cases/ will be run.
-   *
-   * @parameter
    */
-  private String testcases;
+  @Parameter private String testCases;
 
-  /**
-   * JFlex test version
-   *
-   * @parameter
-   */
-  private String jflexTestVersion;
+  /** JFlex version under test. */
+  @Parameter private String jflexTestVersion;
 
-  /** */
+  /** Runs all test cases in {@link #testDirectory}. */
   public void execute() throws MojoExecutionException, MojoFailureException {
     boolean success = true;
     try {
@@ -55,13 +42,13 @@ public class JFlexTestsuiteMojo extends AbstractMojo {
       getLog().info("JFlexTest Version: " + Main.version);
       getLog().info("Testing version: " + Exec.getJFlexVersion());
       getLog().info("Test directory: " + testDirectory);
-      getLog().info("Test case(s): " + (null == testcases ? "All" : testcases));
+      getLog().info("Test case(s): " + (null == testCases ? "All" : testCases));
 
-      if (testcases != null && testcases.length() > 0) {
-        for (String testCase : testcases.split("\\s*,\\s*")) {
+      if (testCases != null && testCases.length() > 0) {
+        for (String testCase : testCases.split("\\s*,\\s*")) {
           File dir = new File(testDirectory, testCase.trim());
           if (!dir.isDirectory()) {
-            throw new MojoFailureException(dir + " - test path not found");
+            throw new MojoFailureException("Test path not found: " + dir);
           }
           List<File> t = Main.scan(dir, ".test", false);
           files.addAll(t);
