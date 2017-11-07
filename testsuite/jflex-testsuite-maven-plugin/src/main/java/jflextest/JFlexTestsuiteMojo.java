@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /** Runs test cases in the JFlex test suite */
-@Mojo(name = "run-test-suite", defaultPhase = LifecyclePhase.TEST)
+@Mojo(name = "run-test-suite", defaultPhase = LifecyclePhase.TEST, threadSafe = true)
 public class JFlexTestsuiteMojo extends AbstractMojo {
 
   /** Name of the directory into which the code will be generated. */
