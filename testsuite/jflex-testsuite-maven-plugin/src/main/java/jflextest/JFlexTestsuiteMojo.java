@@ -7,9 +7,6 @@ import java.util.List;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 
 /** Runs test cases in the JFlex test suite */
 @Mojo(name = "run-test-suite", defaultPhase = LifecyclePhase.TEST)
@@ -38,7 +35,7 @@ public class JFlexTestsuiteMojo extends AbstractMojo {
     boolean success = true;
     try {
       System.setOut(new PrintStream(System.out, true));
-      List<File> files = new ArrayList<File>();
+      List<File> files = new ArrayList<>();
       getLog().info("Testing version: " + Exec.getJFlexVersion());
       getLog().info("Test directory: " + testDirectory);
       getLog().info("Test case(s): " + (null == testCases ? "All" : testCases));
